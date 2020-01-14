@@ -1,23 +1,18 @@
 exports.up = function (knex) {
-    return knex.schema.createTable('users', table => {
+    return knex.schema.createTable('job_vacancies', table => {
         table.increments('id').primary()
-        table.timestamp('registered_at').notNull()
+        table.timestamp('created_at').notNull()
         table.timestamp('deleted_at')
-        table.integer('operatorId').notNull().references('id').inTable('operators')
+        table.integer('admin_id').unsigned().notNull().references('id').inTable('administrators')
 
-        table.string('name').notNull()
-        table.string('email').notNull().unique()
-        table.string('cpf',11).unique().notNull()
-        table.string('rg',20).unique().notNull()
-        table.string('registrationNumber').unique().notNull()
-        table.string('course')
-        table.enum('userType', ['Servidor', 'Aluno']).notNull()
-        table.string('password').notNull()
-        table.string('hardwarePassword').notNull()
+        table.string('title').notNull()
+        table.text('description').notNull()
+        table.integer('recruitment_stages').unsigned().notNull()
+        table.integer('open_vacancies').unsigned().notNull()
 
     })
 };
 
 exports.down = function (knex) {
-    return knex.schema.dropTable('users')
+    return knex.schema.dropTable('job_vacancies')
 };

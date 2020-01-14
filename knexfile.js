@@ -1,7 +1,7 @@
 module.exports = {
   client: 'postgresql',
   connection: {
-    database: 'tcc_db',
+    database: 'desafio_db',
     user:     'postgres',
     password: 'abc123'
   },
