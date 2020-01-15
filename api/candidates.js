@@ -9,8 +9,8 @@ module.exports = app => {
 
 
     const save = (req, res) => {
-        const candidate = { ...req.body }
-        const candidateToken = { ...req.user }
+        const candidate = {...req.body}
+        const candidateToken = {...req.user }
 
         if (candidate.registered_at) delete candidate['registered_at']
 
@@ -68,10 +68,10 @@ module.exports = app => {
                 .whereNull('deleted_at')
                 .first()
                 .update(candidate)
-                .then(candidates => {
+                .then(() => {
                     res.status(204).send()
                 })
-                .catch(err => res.status(500).send("Nao foi possível atualizar usuário."))
+                .catch(err => res.status(500).send("Nao foi possível atualizar candidatura."))
         }
         else if (req.method === "POST") {
 
@@ -79,25 +79,25 @@ module.exports = app => {
             candidate.registered_at = new Date()
             app.db('candidates').insert(candidate)
                 .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send("Nao foi possível cadastrar usuário."))
+                .catch(err => res.status(500).send("Nao foi possível cadastrar candidatura."))
         }
     }
 
-    const getcandidateByCpf = (req, res) => {
+    const getCandidateByCpf = (req, res) => {
 
-        const registrationNumber = req.params.cpf
+        const cpf = req.params.cpf
 
         app.db('candidates')
             .where({ cpf })
             .whereNull('deleted_at')
             .first()
-            .then(candidateFromDb => {
+            .then(candidate_from_db => {
                 let candidate = {
-                    name: candidateFromDb.name,
-                    email: candidateFromDb.email,
-                    cpf: candidateFromDb.cpf,
-                    phone: candidateFromDb.phone,
-                    id: candidateFromDb.id
+                    name: candidate_from_db.name,
+                    email: candidate_from_db.email,
+                    cpf: candidate_from_db.cpf,
+                    phone: candidate_from_db.phone,
+                    id: candidate_from_db.id
                 }
                 return res.json(candidate)
             })
@@ -105,13 +105,13 @@ module.exports = app => {
 
     }
 
-    /*const get = (req, res) => {
+    const get = (req, res) => {
         app.db('candidates')
-            .select('id', 'name', 'cpf', 'rg', 'email', 'candidateType', 'course', 'registrationNumber')
+            .select('id', 'name', 'cpf', 'email', 'phone')
             .whereNull('deleted_at')
             .then(candidates => res.json(candidates))
             .catch(() => res.status(502).send())
-    }*/
+    }
 
    /* const remove = (req, res) => {
         const candidate = { ...req.body }
@@ -127,6 +127,6 @@ module.exports = app => {
             )
     }*/
 
-    return { getcandidateById, save}
+    return { getCandidateByCpf, save, get}
 }
 

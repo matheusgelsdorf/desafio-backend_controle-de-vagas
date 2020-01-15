@@ -18,7 +18,7 @@ module.exports = app => {
         if (valueA !== valueB) throw msg
     }
 
-    function isValidElement(element, elementFromDb, msg) {
+ /* [***] */  function isValidElement(element, elementFromDb, msg) {
         if (!(element && elementFromDb)) throw ('Erro interno')
 
         if (elementFromDb.name && !(element.name === elementFromDb.name)) throw /*'name '+m */msg

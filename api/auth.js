@@ -52,7 +52,7 @@ module.exports = app => {
 
         if (!(device && device.macAddress && device.password)) return res.status(400).send()
 
-        const deviceFromDb = await app.db('devices')
+        const device_from_db = await app.db('devices')
             .where({ macAddress: device.macAddress })
             .whereNull('deleted_at')
             .first()
@@ -61,14 +61,14 @@ module.exports = app => {
             })
 
         try {
-            if (!deviceFromDb) res.status(500).send()
-            const isMatch = await bcrypt.compareSync(device.password, deviceFromDb.password)
+            if (!device_from_db) res.status(500).send()
+            const isMatch = await bcrypt.compareSync(device.password, device_from_db.password)
 
             if (!isMatch) return res.status(400).send()
             const now = new Date() / 1000
             let payload = {
-                id: deviceFromDb.id,
-                macAddress: deviceFromDb.macAddress,
+                id: device_from_db.id,
+                macAddress: device_from_db.macAddress,
                 iat: now,
                 exp: now + (60 * 60 * 4),
                 loggedAs: 'device'
@@ -98,14 +98,14 @@ module.exports = app => {
 
                 if (new Date(token.exp * 1000) > new Date()) {
 
-                    const genUserFromDb = await app.db(tableId)
+                    const genUser_from_db = await app.db(tableId)
                         .whereNull('deleted_at')
                         .where({ id: token.id })
                         .first()
-                    if ((token.name === genUserFromDb.name) &&
-                        (token.cpf === genUserFromDb.cpf) &&
-                        (token.email === genUserFromDb.email) &&
-                        ((token.loggedAs === 'operator') ? (token.admin === genUserFromDb.admin) : true)
+                    if ((token.name === genUser_from_db.name) &&
+                        (token.cpf === genUser_from_db.cpf) &&
+                        (token.email === genUser_from_db.email) &&
+                        ((token.loggedAs === 'operator') ? (token.admin === genUser_from_db.admin) : true)
                     ) {
                         return res.send(true)
                     }
