@@ -5,41 +5,39 @@ const jwt = require('jwt-simple')
 const bcrypt = require('bcrypt-nodejs')
 
 module.exports = app => {
-    const signin = async (req, res) => {
-        let table = req.body.tableId
-        if (!(req.body.cpf || req.body.password)) {
-            return res.status(400).send('Informe usuário e senha')
-        }
-        if (!(req.body.tableId === 'operators' || req.body.tableId === 'users')) return res.status(400).send()
 
-        const genUser = await app.db(table)
-            .where({ cpf: req.body.cpf })
+    const signinCandidate = async (req, res) => {
+        try{
+            app.api.validation.existsOrError(req.body.email, "Insira o email.")
+            app.api.validation.existsOrError(req.body.password, "Insira a senha.")
+
+        }
+        catch(e){
+            return res.status(400).send(e)
+        }
+
+        const candidate = await app.db('candidates')
+            .where({ email: req.body.email })
             .whereNull('deleted_at')
             .first()
-            .catch(_ => res.status(500).send())
+            .catch(_ => res.status(500).send('Erro interno.'))
 
-        if (!genUser) return res.status(400).send('Usuario nao encontrado!')
+        if (!candidate) return res.status(400).send('Candidato não encontrado!')
 
-        const isMatch = await bcrypt.compareSync(req.body.password, genUser.password)
-        if (!isMatch) return res.status(400).send('CPF/Senha inválidos!')
+        const isMatch = await bcrypt.compareSync(req.body.password, candidate.password)
+        if (!isMatch) return res.status(400).send('Senha inválida!')
 
         const now = Math.floor(Date.now() / 1000)
 
 
         let payload = {
-            id: genUser.id,
-            name: genUser.name,
-            email: genUser.email,
-            cpf: genUser.cpf,
+            id: candidate.id,
+            name: candidate.name,
+            email: candidate.email,
+            cpf: candidate.cpf,
+            isAdmin:false,
             iat: now,
             exp: now + (60 * 60 * 10)
-        }
-        if (table === 'operators') {
-            payload.admin = genUser.admin
-            payload.loggedAs = 'operator'
-        }
-        else if (table === 'users') {
-            payload.loggedAs = 'user'
         }
         res.json({
             ...payload,
@@ -47,40 +45,46 @@ module.exports = app => {
         })
     }
 
-    const signinDevice = async (req, res) => {
-        const device = { ...req.body }
+    const signinAdmin = async (req, res) => {
+        try{
+            app.api.validation.existsOrError(req.body.email, "Insira o email.")
+            app.api.validation.existsOrError(req.body.password, "Insira a senha.")
 
-        if (!(device && device.macAddress && device.password)) return res.status(400).send()
+        }
+        catch(e){
+            return res.status(400).send(e)
+        }
 
-        const device_from_db = await app.db('devices')
-            .where({ macAddress: device.macAddress })
+        const admin = await app.db('admins')
+            .where({ email: req.body.email })
             .whereNull('deleted_at')
             .first()
-            .catch(_ => {
-                return res.status(500).send()
-            })
+            .catch(_ => res.status(500).send('Erro interno.'))
 
-        try {
-            if (!device_from_db) res.status(500).send()
-            const isMatch = await bcrypt.compareSync(device.password, device_from_db.password)
+        if (!admin) return res.status(400).send('Administrador não encontrado!')
 
-            if (!isMatch) return res.status(400).send()
-            const now = new Date() / 1000
-            let payload = {
-                id: device_from_db.id,
-                macAddress: device_from_db.macAddress,
-                iat: now,
-                exp: now + (60 * 60 * 4),
-                loggedAs: 'device'
-            }
-            res.json({
-                token: jwt.encode(payload, authSecret)
-            })
+        const isMatch = await bcrypt.compareSync(req.body.password, admin.password)
+        if (!isMatch) return res.status(400).send('Senha inválida!')
+
+        const now = Math.floor(Date.now() / 1000)
+
+
+        let payload = {
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            cpf: admin.cpf,
+            isAdmin:true,
+            iat: now,
+            exp: now + (60 * 60 * 10)
         }
-        catch (e) {
-            console.log(e)
-        }
+        res.json({
+            ...payload, // usado pelo front
+            token: jwt.encode(payload, authSecret)
+        })
     }
+
+   
 
     // Check if all token fields are valid.
     const validateToken = async (req, res) => {
@@ -89,23 +93,23 @@ module.exports = app => {
         try {
             if (loginData) {
                 const token = jwt.decode(loginData.token, authSecret)
-                let tableId
+                let table_id
 
 
-                if (token.loggedAs === 'operator') tableId = 'operators'
-                else if (token.loggedAs === 'user') tableId = 'users'
-                else throw ('Erro interno.')
+                if (token.isAdmin) table_id = 'administrators'
+                else  table_id = 'candidates'
+             
 
                 if (new Date(token.exp * 1000) > new Date()) {
 
-                    const genUser_from_db = await app.db(tableId)
+                    const user_from_db = await app.db(table_id)
                         .whereNull('deleted_at')
                         .where({ id: token.id })
                         .first()
-                    if ((token.name === genUser_from_db.name) &&
-                        (token.cpf === genUser_from_db.cpf) &&
-                        (token.email === genUser_from_db.email) &&
-                        ((token.loggedAs === 'operator') ? (token.admin === genUser_from_db.admin) : true)
+                    if ((token.name === user_from_db.name) &&
+                        (token.cpf === user_from_db.cpf) &&
+                        (token.email === user_from_db.email) &&
+                        (token.phone === user_from_db.phone)
                     ) {
                         return res.send(true)
                     }
@@ -123,5 +127,5 @@ module.exports = app => {
     }
 
 
-    return { signin, validateToken, signinDevice }
+    return { signinCandidate, signinAdmin, validateToken}
 }

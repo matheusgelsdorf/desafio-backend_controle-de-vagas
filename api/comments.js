@@ -1,53 +1,28 @@
-const bcrypt = require('bcrypt-nodejs')
-
 module.exports = app => {
 
-    const encryptPassword = (password) => {
-        const salt = bcrypt.genSaltSync(10)
-        return bcrypt.hashSync(password, salt)
-    }
-
-
     const save = (req, res) => {
-        const administrator = {...req.body}
-        const administratorToken = {...req.user }
+        const comment = { ...req.body.comment }
+        const comment_id = req.body.comment_id
+        const admin = { ...req.user }
 
-        if (administrator.registered_at) delete administrator['registered_at']
+        if (comment.registered_at) delete comment['posted_at']
 
-        if (administrator.deleted_at) delete administrator['deleted_at']
+        if (comment.deleted_at) delete comment['deleted_at']
+        if (comment.edited_at) delete comment['edited_at']
 
         /* Validações */
 
         try {
             if (req.method === "PUT") {
-                //name
-                if (administrator.name) app.api.validation.existsOrError(administrator.name, "Insira um nome.")
-                //cpf
-                if (administrator.cpf) app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
-                //email
-                if (administrator.email) app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
-                app.api.validation.validateEmail(administrator.email, "Email inválido.")
-                //senha
-                if (administrator.password) {
+                if (comment.content) app.api.validation.existsOrError(comment.content, "Insira um comentário.")
 
-                    app.api.validation.existsOrError(administrator.password, "Insira uma senha válida.")
-                    app.api.validation.existsOrError(administrator.confirmPassword, "Confirme a senha.")
-                    app.api.validation.equalsOrError(administrator.password, administrator.confirmPassword, 'Senhas nao conferem.')
-                }
-                //phone
-                if (administrator.phone) app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
+                app.api.validation.existsOrError(comment_id, "Escolha um comentario para editar.")
 
             }
             else if (req.method === "POST") {
-                app.api.validation.existsOrError(administrator.name, "Insira um nome.")
-                app.api.validation.existsOrError(administrator.email, "Insira um email.")
-                app.api.validation.validateEmail(administrator.email, "Email inválido.")
+                app.api.validation.existsOrError(comment.application_id, "Escolha uma candidatura para comentar.")
 
-                app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
-                app.api.validation.existsOrError(administrator.password, "Insira a senha.")
-                app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
-                app.api.validation.existsOrError(administrator.confirmPassword, "Confirme a senha.")
-                app.api.validation.equalsOrError(administrator.password, administrator.confirmPassword, 'Senhas não conferem.')
+                app.api.validation.existsOrError(comment.content, "Insira um comentário.")
 
             }
         }
@@ -58,75 +33,77 @@ module.exports = app => {
 
 
 
-        if (administrator.password) administrator.password = encryptPassword(administrator.password) // caso o metodo for PUT
-        delete administrator['confirmPassword']
-
-
         if (req.method === "PUT") {
-            app.db('administrators')
-                .where({ id: administratorToken.id })
+            if (admin.id == !comment_id) return res.status(403).send("Usuário não tem permissão para editar esse comentário.")
+            const comment_edited = { edited_at: new Date(), content: comment.content }
+            app.db('comments')
+                .where({ id: comment_id })
                 .whereNull('deleted_at')
                 .first()
-                .update(administrator)
+                .update(comment_edited)
                 .then(() => {
                     res.status(204).send()
                 })
-                .catch(err => res.status(500).send("Nao foi possível atualizar usuário."))
+                .catch(err => res.status(500).send("Não foi possível editar comentário."))
         }
         else if (req.method === "POST") {
 
-            if (administrator.id) delete administrator['id']
-            administrator.registered_at = new Date()
-            app.db('administrators').insert(administrator)
+            if (comment.id) delete comment['id']
+            comment.posted_at = new Date()
+            app.db('comments').insert(comment)
                 .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send("Nao foi possível cadastrar usuário."))
+                .catch(err => res.status(500).send("Nao foi possível cadastrar comentário."))
         }
     }
 
-    const getadministratorByCpf = (req, res) => {
+    const getCommentById = (req, res) => {
 
-        const cpf = req.params.cpf
+        const id = req.params.id
 
-        app.db('administrators')
-            .where({ cpf })
+        app.db('comments')
+            .where({ id })
             .whereNull('deleted_at')
             .first()
-            .then(administrator_from_db => {
-                let administrator = {
-                    name: administrator_from_db.name,
-                    email: administrator_from_db.email,
-                    cpf: administrator_from_db.cpf,
-                    phone: administrator_from_db.phone,
-                    id: administrator_from_db.id
-                }
-                return res.json(administrator)
+            .then(comment_from_db => {
+                delete comment_from_db['deleted_at']
+                return res.json(comment_from_db)
             })
-            .catch(err => res.status(500).send())
+            .catch(err => res.status(500).send("Nao foi possivel encontrar comentário. Verifique se os dados fornecidos estâo corretos."))
 
     }
 
-    const get = (req, res) => {
-        app.db('administrators')
-            .select('id', 'name', 'cpf', 'email', 'phone')
+    const getAllApplicationsCommentsById = (req, res) => {
+
+       let admin={...req.user}
+       const application_id={...req.params.application_id}
+
+        app.db('comments')
+            .select('id', 'posted_at', 'edited_at','content')
+            .where({ id:admin.id, application_id})
             .whereNull('deleted_at')
-            .then(administrators => res.json(administrators))
-            .catch(() => res.status(502).send())
+            .then(comment_from_db_set => {
+                return res.json(comment_from_db_set)
+            })
+            .catch(err => res.status(500).send("Erro ao buscar usuário. Verifique se os dados estão corretos.")) //[***] Arrumar esse erro inesperado
+
     }
 
-   /* const remove = (req, res) => {
-        const administrator = { ...req.body }
-        app.db('administrators')
-            .where({ id: administrator.id })
-            .whereNull('deleted_at')
-            .first()
-            .update({ deleted_at: new Date() })
-            .then(() => res.status(204).send())
-            .catch((e) => {
-                res.status(501).send()
-            }
-            )
-    }*/
+ 
 
-    return { getadministratorByCpf, save, get}
+    /* const remove = (req, res) => {
+         const comment = { ...req.body }
+         app.db('comments')
+             .where({ id: comment.id })
+             .whereNull('deleted_at')
+             .first()
+             .update({ deleted_at: new Date() })
+             .then(() => res.status(204).send())
+             .catch((e) => {
+                 res.status(501).send()
+             }
+             )
+     }*/
+
+    return { getAllApplicationsCommentsById, getCommentById, save}
 }
 

@@ -1,4 +1,4 @@
-candiexports.up = function (knex) {
+exports.up = function (knex) {
     return knex.schema.createTable('job_applications', table => {
         table.increments('id').primary()
         table.timestamp('applied_at').notNull()

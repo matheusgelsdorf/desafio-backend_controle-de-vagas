@@ -10,7 +10,7 @@ module.exports = app => {
 
     const save = (req, res) => {
         const administrator = {...req.body}
-        const administratorToken = {...req.user }
+        const administrator_token = {...req.user }
 
         if (administrator.registered_at) delete administrator['registered_at']
 
@@ -64,7 +64,7 @@ module.exports = app => {
 
         if (req.method === "PUT") {
             app.db('administrators')
-                .where({ id: administratorToken.id })
+                .where({ id: administrator_token.id })
                 .whereNull('deleted_at')
                 .first()
                 .update(administrator)
@@ -83,7 +83,7 @@ module.exports = app => {
         }
     }
 
-    const getadministratorByCpf = (req, res) => {
+    const getAdministratorByCpf = (req, res) => {
 
         const cpf = req.params.cpf
 
@@ -127,6 +127,6 @@ module.exports = app => {
             )
     }*/
 
-    return { getadministratorByCpf, save, get}
+    return { getAdministratorByCpf, save, get}
 }
 

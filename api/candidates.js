@@ -10,7 +10,7 @@ module.exports = app => {
 
     const save = (req, res) => {
         const candidate = {...req.body}
-        const candidateToken = {...req.user }
+        const candidate_token = {...req.user }
 
         if (candidate.registered_at) delete candidate['registered_at']
 
@@ -64,7 +64,7 @@ module.exports = app => {
 
         if (req.method === "PUT") {
             app.db('candidates')
-                .where({ id: candidateToken.id })
+                .where({ id: candidate_token.id })
                 .whereNull('deleted_at')
                 .first()
                 .update(candidate)
