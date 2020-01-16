@@ -2,10 +2,12 @@ module.exports = (middleware) => {
 
     const admin = function () {
         return (req, res, next) => {
+            
             if (req.user.isAdmin) {
                 middleware(req, res, next)
             }
             else {
+
                 res.status(401).send('Usuário nao tem permissäo.')
             }
         }
@@ -13,6 +15,7 @@ module.exports = (middleware) => {
 
     const candidate = function () {
         return (req, res, next) => {
+            
             if (!req.user.isAdmin) {
                 middleware(req, res, next)
             }

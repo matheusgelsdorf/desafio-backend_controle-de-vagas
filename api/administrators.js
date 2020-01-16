@@ -20,22 +20,15 @@ module.exports = app => {
 
         try {
             if (req.method === "PUT") {
-                //name
-                if (administrator.name) app.api.validation.existsOrError(administrator.name, "Insira um nome.")
+                app.api.validation.existsOrError(administrator,"Insira os dados que deseja atualizar.")
+                //name 
+                if (administrator.name || administrator.name === "") app.api.validation.existsOrError(administrator.name, "Insira um nome.")
                 //cpf
-                if (administrator.cpf) app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
+                if (administrator.cpf || administrator.cpf === "") app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
                 //email
-                if (administrator.email) app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
-                app.api.validation.validateEmail(administrator.email, "Email inválido.")
-                //senha
-                if (administrator.password) {
-
-                    app.api.validation.existsOrError(administrator.password, "Insira uma senha válida.")
-                    app.api.validation.existsOrError(administrator.confirmPassword, "Confirme a senha.")
-                    app.api.validation.equalsOrError(administrator.password, administrator.confirmPassword, 'Senhas nao conferem.')
-                }
+                if (administrator.email || administrator.email === "") app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
                 //phone
-                if (administrator.phone) app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
+                if (administrator.phone || administrator.phone === "") app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
 
             }
             else if (req.method === "POST") {

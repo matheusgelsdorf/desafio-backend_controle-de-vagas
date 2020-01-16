@@ -11,16 +11,20 @@ module.exports = app => {
     }
 
     const strategy = new Strategy(params, (payload, done) => {
+        
         if (new Date(payload.exp * 1000) < new Date()) {
             return done('Token Expirado.', false)
         }
-        
+       
+
         if (payload.isAdmin) {
             app.db('administrators')
                 .where({ id: payload.id })
                 .whereNull("deleted_at")
                 .first()
                 .then(admin_from_db => {
+                    console.log(payload)
+                    console.log(admin_from_db)
                     if (
                         admin_from_db &&
                         payload.email === admin_from_db.email &&
@@ -28,7 +32,6 @@ module.exports = app => {
                         payload.name === admin_from_db.name &&
                         payload.phone === admin_from_db.phone
                     ) {
-
                         return done(null, { ...payload })
                     }
                     else {
@@ -36,7 +39,9 @@ module.exports = app => {
                     }
 
                 })
-                .catch(err => done(err, false))
+                .catch(err =>{ 
+                    done(err, false)
+                })
         }
 
         else{

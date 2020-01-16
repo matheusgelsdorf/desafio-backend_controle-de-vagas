@@ -81,6 +81,6 @@ module.exports = app => {
             )
     }*/
 
-    return { getAllCandidatesJobApplicationByID,getJobVacancyById, save}
+    return { getAllCandidatesJobApplicationByID,getJobApplicationById, save}
 }
 

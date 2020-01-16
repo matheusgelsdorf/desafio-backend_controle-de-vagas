@@ -35,6 +35,7 @@ module.exports = app => {
             name: candidate.name,
             email: candidate.email,
             cpf: candidate.cpf,
+            phone: candidate.phone,
             isAdmin:false,
             iat: now,
             exp: now + (60 * 60 * 10)
@@ -55,7 +56,7 @@ module.exports = app => {
             return res.status(400).send(e)
         }
 
-        const admin = await app.db('admins')
+        const admin = await app.db('administrators')
             .where({ email: req.body.email })
             .whereNull('deleted_at')
             .first()
@@ -74,6 +75,7 @@ module.exports = app => {
             name: admin.name,
             email: admin.email,
             cpf: admin.cpf,
+            phone: admin.phone,
             isAdmin:true,
             iat: now,
             exp: now + (60 * 60 * 10)
