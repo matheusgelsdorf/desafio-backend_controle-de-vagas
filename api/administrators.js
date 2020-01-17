@@ -26,7 +26,10 @@ module.exports = app => {
                 //cpf
                 if (administrator.cpf || administrator.cpf === "") app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
                 //email
-                if (administrator.email || administrator.email === "") app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
+                if (administrator.email) {
+                    app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
+                    app.api.validation.validateEmail(administrator.email, "Email inválido.")
+                }
                 //phone
                 if (administrator.phone || administrator.phone === "") app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
 
@@ -78,8 +81,8 @@ module.exports = app => {
 
     const getAdministratorByCpf = (req, res) => {
 
-        const cpf = req.params.cpf
-
+        const cpf=req.user.cpf
+        
         app.db('administrators')
             .where({ cpf })
             .whereNull('deleted_at')

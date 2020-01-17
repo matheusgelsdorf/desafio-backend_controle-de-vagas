@@ -9,8 +9,8 @@ module.exports = app => {
 
 
     const save = (req, res) => {
-        const candidate = {...req.body}
-        const candidate_token = {...req.user }
+        const candidate = { ...req.body }
+        const candidate_token = { ...req.user }
 
         if (candidate.registered_at) delete candidate['registered_at']
 
@@ -20,13 +20,16 @@ module.exports = app => {
 
         try {
             if (req.method === "PUT") {
+                app.api.validation.existsOrError(candidate, "Insira os dados que deseja atualizar.")
                 //name
                 if (candidate.name) app.api.validation.existsOrError(candidate.name, "Insira um nome.")
                 //cpf
                 if (candidate.cpf) app.api.validation.existsOrError(candidate.cpf, "Insira o cpf.")
                 //email
-                if (candidate.email) app.api.validation.existsOrError(candidate.email, "Insira um email válido.")
-                app.api.validation.validateEmail(candidate.email, "Email inválido.")
+                if (candidate.email) {
+                    app.api.validation.existsOrError(candidate.email, "Insira um email válido.")
+                    app.api.validation.validateEmail(candidate.email, "Email inválido.")
+                }
                 //senha
                 if (candidate.password) {
 
@@ -71,7 +74,7 @@ module.exports = app => {
                 .then(() => {
                     res.status(204).send()
                 })
-                .catch(err => res.status(500).send("Nao foi possível atualizar candidatura."))
+                .catch(err => res.status(500).send("Nao foi possível atualizar candidato."))
         }
         else if (req.method === "POST") {
 
@@ -79,13 +82,18 @@ module.exports = app => {
             candidate.registered_at = new Date()
             app.db('candidates').insert(candidate)
                 .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send("Nao foi possível cadastrar candidatura."))
+                .catch(err => res.status(500).send("Nao foi possível cadastrar candidato."))
         }
     }
 
     const getCandidateByCpf = (req, res) => {
-
-        const cpf = req.params.cpf
+        let cpf
+        if (req.user.isAdmin) {
+            cpf = req.params.cpf
+        }
+        else {
+            cpf = req.user.cpf
+        }
 
         app.db('candidates')
             .where({ cpf })
@@ -113,20 +121,20 @@ module.exports = app => {
             .catch(() => res.status(502).send())
     }
 
-   /* const remove = (req, res) => {
-        const candidate = { ...req.body }
-        app.db('candidates')
-            .where({ id: candidate.id })
-            .whereNull('deleted_at')
-            .first()
-            .update({ deleted_at: new Date() })
-            .then(() => res.status(204).send())
-            .catch((e) => {
-                res.status(501).send()
-            }
-            )
-    }*/
+    /* const remove = (req, res) => {
+         const candidate = { ...req.body }
+         app.db('candidates')
+             .where({ id: candidate.id })
+             .whereNull('deleted_at')
+             .first()
+             .update({ deleted_at: new Date() })
+             .then(() => res.status(204).send())
+             .catch((e) => {
+                 res.status(501).send()
+             }
+             )
+     }*/
 
-    return { getCandidateByCpf, save, get}
+    return { getCandidateByCpf, save, get }
 }
 

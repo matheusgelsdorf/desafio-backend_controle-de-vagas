@@ -4,7 +4,7 @@ module.exports = app => {
 
     const save = (req, res) => {
         const job_vacancy = {...req.body}
-        const admin = {...req.user }
+        const admin_token = {...req.user }
 
         if (job_vacancy.created_at) delete job_vacancy['created_at']
 
@@ -19,16 +19,16 @@ module.exports = app => {
                 //descrição
                 if (job_vacancy.description) app.api.validation.existsOrError(job_vacancy.description, "Insira a descrição da vaga.")
                 //etapas de recrutamento
-                if (job_vacancy.recruitment_stages) app.api.validation.existsOrError(job_vacancy.recruitment_stages, "Insira o numero de etapas de recrutamento.")
+                if (job_vacancy.recruitment_stages) app.api.validation.existsOrError(job_vacancy.recruitment_stages, "Insira o numero de etapas de recrutamento.") //[***]
                 // vagas abertas
-                if (job_vacancy.open_vacancies) app.api.validation.existsOrError(job_vacancy.open_vacancies, "Insira o numero de vagas abertas para o cargo.")
+                if (job_vacancy.open_vacancies) app.api.validation.existsOrError(job_vacancy.open_vacancies, "Insira o numero de vagas abertas para o cargo.") //[***]
 
             }
             else if (req.method === "POST") {
                 app.api.validation.existsOrError(job_vacancy.title, "Insira um título da vaga.")
                 app.api.validation.existsOrError(job_vacancy.description, "Insira a descrição da vaga.")
-                app.api.validation.existsOrError(job_vacancy.recruitment_stages, "Insira o numero de etapas de recrutamento.")
-                app.api.validation.existsOrError(job_vacancy.open_vacancies, "Insira o numero de vagas abertas para o cargo.")
+                app.api.validation.existsOrError(job_vacancy.recruitment_stages, "Insira o numero de etapas de recrutamento.") //[***]
+                app.api.validation.existsOrError(job_vacancy.open_vacancies, "Insira o numero de vagas abertas para o cargo.") //[***]
 
             }
         }
@@ -40,6 +40,7 @@ module.exports = app => {
 
 
         if (req.method === "PUT") {
+            if(job_vacancy.admin_id ==! admin_token.id) return res.status(401).send("Você não tem permissão para alterar a vaga. Você so pode alterar vagas de sua autoria.")
             app.db('job_vacancies')
                 .where({ id: job_vacancy.id })
                 .whereNull('deleted_at')
@@ -54,7 +55,7 @@ module.exports = app => {
 
             if (job_vacancy.id) delete job_vacancy['id']
             job_vacancy.created_at = new Date()
-            job_vacancy.admin_id=admin.id
+            job_vacancy.admin_id=admin_token.id
             app.db('job_vacancies').insert(job_vacancy)
                 .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send("Nao foi possível cadastrar vaga."))

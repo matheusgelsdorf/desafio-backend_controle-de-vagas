@@ -2,7 +2,7 @@ const accessLevel = require('./auth-access-level')
 
 
 module.exports = app => {
-
+   //-----------------------------------------//
    app.route('/signin/admin') //[--] Testado
       .post(app.api.auth.signinAdmin)
 
@@ -13,51 +13,64 @@ module.exports = app => {
       .post(app.api.auth.validateToken)
 
    app.route('/signup/candidate')
-      .post(app.api.candidates.save) // Cadastra um candidato  
+      .post(app.api.candidates.save) 
 
    // --------------------------------------------------------------------- //  
-   app.route('/comment/getById/:id')
-   .all(app.config.passport.authenticate())
-   .get(accessLevel(app.api.candidates.getCommentById).admin())  // Retorna um unico comentario correspondete ao id
-
-
-
-
-   app.route('/comment/application/getByID/:id')
-   .all(app.config.passport.authenticate())
-   .get(accessLevel(app.api.candidates.getAllApplicationsCommentsById).admin())  // Retorna todos os comentarios de um administrador feito a uma vaga de emprego.
-
-
-
-   app.route('/comment')
+   
+   app.route('/candidate/getByCpf')
       .all(app.config.passport.authenticate())
-      .post(accessLevel(app.api.comments.save).admin()) // Cadastra um comentario  
-      .put(accessLevel(app.api.comments.save).admin()) // Atualiza os dados de um comentario. So pode ser atualizado pelo proprio administrador que comentou pela primeira vez.
-   //.delete()
-
+      .get(accessLevel(app.api.candidates.getCandidateByCpf).candidate()) //[--] Testado
 
    app.route('/candidate/getByCpf/:cpf')
       .all(app.config.passport.authenticate())
-      .get(app.api.candidates.getCandidateByCpf)
+      .get(accessLevel(app.api.candidates.getCandidateByCpf).admin())
+
 
    app.route('/candidate')
       .all(app.config.passport.authenticate())
-      .get(accessLevel(app.api.candidates.get).admin())  // Retorna todos os candidatos cadastrados
-      .put(accessLevel(app.api.candidates.save).candidate()) // Atualiza os dados de um candidato. So pode ser atualizado pelo proprio candidato.
+      .get(accessLevel(app.api.candidates.get).admin())  //[--] Testado
+      .put(accessLevel(app.api.candidates.save).candidate()) //[--] Testado 
    //.delete()
 
-
-   app.route('/admin/getByCpf/:cpf')
+   app.route('/admin/getByCpf')
       .all(app.config.passport.authenticate())
       .get(accessLevel(app.api.administrators.getAdministratorByCpf).admin())
 
 
    app.route('/admin')
       .all(app.config.passport.authenticate())
-      .post(accessLevel(app.api.administrators.save).admin()) // Cadastra um administrador  [--] Testada
-      .get(accessLevel(app.api.administrators.get).admin())  // Retorna todos os administradores cadastrados [--] Testada
-      .put(accessLevel(app.api.administrators.save).admin()) // Atualiza os dados de um administrador. So pode ser atualizado pelo proprio  administrador. [--] Testada
+      .post(accessLevel(app.api.administrators.save).admin()) // [--] Testada
+      .get(accessLevel(app.api.administrators.get).admin())  // [--] Testada
+      .put(accessLevel(app.api.administrators.save).admin()) //[--] Testada
    //.delete()
+      
+   app.route('/vacancy/getJobVacancyById/:id')
+      .all(app.config.passport.authenticate())
+      .get(app.api.job_vacancies.getJobVacancyById)
+
+   app.route('/vacancy')
+      .all(app.config.passport.authenticate())
+      .post(accessLevel(app.api.job_vacancies.save).admin())  
+      .get(app.api.job_vacancies.get) // [--] Testado
+      .put(accessLevel(app.api.job_vacancies.save).admin())
+//.delete()
+
+   app.route('/comment/getById/:id')
+   .all(app.config.passport.authenticate())
+   .get(accessLevel(app.api.candidates.getCommentById).admin())  
+
+
+   app.route('/comment/application/getByID/:id')
+   .all(app.config.passport.authenticate())
+   .get(accessLevel(app.api.candidates.getAllApplicationsCommentsById).admin()) 
+
+
+   app.route('/comment')
+      .all(app.config.passport.authenticate())
+      .post(accessLevel(app.api.comments.save).admin()) 
+      .put(accessLevel(app.api.comments.save).admin()) 
+   //.delete()
+
 
 
    //---------------------------------------------------------------------
