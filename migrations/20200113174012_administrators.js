@@ -1,6 +1,7 @@
 exports.up = function(knex) {
     return knex.schema.createTable('administrators',table =>{
         table.increments('id').primary()
+        
         table.timestamp('registered_at').notNull()
         table.timestamp('deleted_at')
 
