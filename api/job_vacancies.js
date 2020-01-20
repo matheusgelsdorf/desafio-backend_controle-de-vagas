@@ -2,9 +2,10 @@
 
 module.exports = app => {
 
-    const save = (req, res) => {
-        const job_vacancy = {...req.body}
-        const admin_token = {...req.user }
+    const save = async (req, res) => {
+        let job_vacancy = { ...req.body}
+        const admin_token = { ...req.user }
+
 
         if (job_vacancy.created_at) delete job_vacancy['created_at']
 
@@ -14,6 +15,8 @@ module.exports = app => {
 
         try {
             if (req.method === "PUT") {
+
+                app.api.validation.existsOrError(job_vacancy, "Insira os dados que deseja modificar na vaga de emprego.")
                 //titulo
                 if (job_vacancy.title) app.api.validation.existsOrError(job_vacancy.title, "Insira um título da vaga.")
                 //descrição
@@ -35,14 +38,29 @@ module.exports = app => {
         catch (e) {
             return res.status(400).send(e)
         }
-        /* ---------------- */
-
+     
 
 
         if (req.method === "PUT") {
-            if(job_vacancy.admin_id ==! admin_token.id) return res.status(401).send("Você não tem permissão para alterar a vaga. Você so pode alterar vagas de sua autoria.")
+
+            try {
+                await app.db('job_vacancies')
+                    .select(["admin_id"])
+                    .where({ id: job_vacancy.id })
+                    .whereNull('deleted_at')
+                    .first()
+                    .then(vacancy_from_db => {
+                        job_vacancy.admin_id = vacancy_from_db.admin_id
+                    })
+            } 
+            catch (e) {
+                return res.status(404).send("Vaga nao encontrada.")
+            }
+
+            if (job_vacancy.admin_id !== admin_token.id) return res.status(401).send("Você não tem permissão para alterar a vaga. Você so pode alterar vagas de sua autoria.")
+
             app.db('job_vacancies')
-                .where({ id: job_vacancy.id })
+                .where({ id: job_vacancy.id, admin_id: admin_token.id })
                 .whereNull('deleted_at')
                 .first()
                 .update(job_vacancy)
@@ -55,7 +73,7 @@ module.exports = app => {
 
             if (job_vacancy.id) delete job_vacancy['id']
             job_vacancy.created_at = new Date()
-            job_vacancy.admin_id=admin_token.id
+            job_vacancy.admin_id = admin_token.id
             app.db('job_vacancies').insert(job_vacancy)
                 .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send("Nao foi possível cadastrar vaga."))
@@ -86,26 +104,26 @@ module.exports = app => {
 
     const get = (req, res) => {
         app.db('job_vacancies')
-            .select('id', 'title', 'description', 'recruitment_stages', 'open_vacancies','admin_id','created_at')
+            .select('id', 'title', 'description', 'recruitment_stages', 'open_vacancies', 'admin_id', 'created_at')
             .whereNull('deleted_at')
             .then(job_vacancies => res.json(job_vacancies))
             .catch(() => res.status(502).send())
     }
 
-   /* const remove = (req, res) => {
-        const job_vacancy = { ...req.body }
-        app.db('job_vacancies')
-            .where({ id: job_vacancy.id })
-            .whereNull('deleted_at')
-            .first()
-            .update({ deleted_at: new Date() })
-            .then(() => res.status(204).send())
-            .catch((e) => {
-                res.status(501).send()
-            }
-            )
-    }*/
+    /* const remove = (req, res) => {
+         const job_vacancy = { ...req.body }
+         app.db('job_vacancies')
+             .where({ id: job_vacancy.id })
+             .whereNull('deleted_at')
+             .first()
+             .update({ deleted_at: new Date() })
+             .then(() => res.status(204).send())
+             .catch((e) => {
+                 res.status(501).send()
+             }
+             )
+     }*/
 
-    return { getJobVacancyById, save, get}
+    return { getJobVacancyById, save, get }
 }
 

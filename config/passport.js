@@ -23,8 +23,7 @@ module.exports = app => {
                 .whereNull("deleted_at")
                 .first()
                 .then(admin_from_db => {
-                    console.log(payload)
-                    console.log(admin_from_db)
+                
                     if (
                         admin_from_db &&
                         payload.email === admin_from_db.email &&

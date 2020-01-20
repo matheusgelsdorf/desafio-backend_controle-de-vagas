@@ -1,8 +1,7 @@
 module.exports = app => {
 
-    const save = (req, res) => {
-        const comment = { ...req.body.comment }
-        const comment_id = req.body.comment_id
+    const save = async (req, res) => {
+        const comment = { ...req.body }
         const admin = { ...req.user }
 
         if (comment.registered_at) delete comment['posted_at']
@@ -16,10 +15,11 @@ module.exports = app => {
             if (req.method === "PUT") {
                 if (comment.content) app.api.validation.existsOrError(comment.content, "Insira um comentário.")
 
-                app.api.validation.existsOrError(comment_id, "Escolha um comentario para editar.")
+                app.api.validation.existsOrError(comment.id, "Escolha um comentario para editar.")
 
             }
             else if (req.method === "POST") {
+
                 app.api.validation.existsOrError(comment.application_id, "Escolha uma candidatura para comentar.")
 
                 app.api.validation.existsOrError(comment.content, "Insira um comentário.")
@@ -34,23 +34,45 @@ module.exports = app => {
 
 
         if (req.method === "PUT") {
-            if (admin.id == !comment_id) return res.status(403).send("Usuário não tem permissão para editar esse comentário.")
-            const comment_edited = { edited_at: new Date(), content: comment.content }
-            app.db('comments')
-                .where({ id: comment_id })
-                .whereNull('deleted_at')
-                .first()
-                .update(comment_edited)
-                .then(() => {
-                    res.status(204).send()
-                })
-                .catch(err => res.status(500).send("Não foi possível editar comentário."))
+            const comment_edited = {
+                id: comment.id,
+                edited_at: new Date(),
+                content: comment.content
+            }
+            try {
+               const comment_from_db= await app.db('comments')
+                    .where({ id: comment_edited.id })
+                    .whereNull('deleted_at')
+                    .first()
+                    
+                    if (!comment_from_db || comment_from_db === {} || (admin.id !== comment_from_db.admin_id)) return res.status(403).send("Usuário não tem permissão para editar esse comentário.")
+                    
+                    await app.db('comments')
+                    .where({ id: comment_edited.id })
+                    .whereNull('deleted_at')
+                    .first()
+                    .update(comment_edited)
+                    .then(() => {
+                        return res.status(204).send()
+                    })
+            }
+            catch (e) {
+                return res.status(500).send("Não foi possível editar comentário.")
+            }
         }
         else if (req.method === "POST") {
 
             if (comment.id) delete comment['id']
-            comment.posted_at = new Date()
-            app.db('comments').insert(comment)
+            const comment_to_save = {
+                posted_at: new Date(),
+                edited_at: null,
+                deleted_at: null,
+                admin_id: admin.id,
+                application_id: comment.application_id,
+                content: comment.content
+            }
+
+            app.db('comments').insert(comment_to_save)
                 .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send("Nao foi possível cadastrar comentário."))
         }
@@ -74,21 +96,20 @@ module.exports = app => {
 
     const getAllApplicationsCommentsById = (req, res) => {
 
-       let admin={...req.user}
-       const application_id={...req.params.application_id}
+        const application_id = req.params.application_id
 
         app.db('comments')
-            .select('id', 'posted_at', 'edited_at','content')
-            .where({ id:admin.id, application_id})
+            .select('id', 'posted_at', 'edited_at', 'content', 'application_id')
+            .where({ application_id })
             .whereNull('deleted_at')
             .then(comment_from_db_set => {
                 return res.json(comment_from_db_set)
             })
-            .catch(err => res.status(500).send("Erro ao buscar usuário. Verifique se os dados estão corretos.")) //[***] Arrumar esse erro inesperado
+            .catch(err => res.status(500).send("Erro ao buscar usuário."))
 
     }
 
- 
+
 
     /* const remove = (req, res) => {
          const comment = { ...req.body }
@@ -104,6 +125,6 @@ module.exports = app => {
              )
      }*/
 
-    return { getAllApplicationsCommentsById, getCommentById, save}
+    return { getAllApplicationsCommentsById, getCommentById, save }
 }
 

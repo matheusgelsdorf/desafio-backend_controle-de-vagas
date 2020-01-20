@@ -38,12 +38,17 @@ module.exports = app => {
         if (!re.test(email)) throw msg
     }
 
+    function isValidStage(stage, msg) {
+        const stages_array=['Em Andamento','Aprovado','Reprovado']
+        if ( !stages_array.includes(stage)) throw(msg)
+    }
 
     return {
         existsOrError,
         notExistsOrError,
         equalsOrError,
         isValidElement,
-        validateEmail        
+        validateEmail,
+        isValidStage        
     }
 }

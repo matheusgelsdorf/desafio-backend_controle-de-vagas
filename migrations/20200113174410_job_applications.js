@@ -7,7 +7,7 @@ exports.up = function (knex) {
         
         table.integer('vacancy_id').unsigned().notNull().references('id').inTable('job_vacancies')
         table.integer('current_stage').unsigned().notNull()
-        table.enum('status', ['Aprovado', 'Reprovado','Em Andamento']).notNull()
+        table.enum('stage', ['Aprovado', 'Reprovado','Em Andamento']).notNull()
 
     })
 };
