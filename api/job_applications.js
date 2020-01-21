@@ -1,7 +1,7 @@
 module.exports = app => {
 
     const save = async (req, res) => {
-        const vacancy_id_set = [...(req.body.vacancy_id_set)]
+        let vacancy_id_set = [...(req.body.vacancy_id_set)]
         const candidate = { ...req.user }
         /* Validações */
 
@@ -13,26 +13,51 @@ module.exports = app => {
             return res.status(400).send(e)
         }
         /* ---------------- */
-        
-        
-        //if (job_application_set.id) delete job_application_set['id']
-        let job_application_set = []
-        vacancy_id_set.forEach((vacancy) => {
-            job_application_set.push({
+
+
+
+        try {
+            const job_application_from_db_set = await app.db('job_applications')
+                .select(['vacancy_id'])
+                .where({ candidate_id: candidate.id })
+                .whereNull('deleted_at')
+
+
+            console.log(job_application_from_db_set)
+            const checkRepeatedVacancys= (vacancy_id) => {
+                const exists_vacancy=job_application_from_db_set.find(
+                    (vacancy_from_db) => {
+                        if(vacancy_from_db.vacancy_id === vacancy_id) return true
+                        return false
+                    }    
+                )
+                if (exists_vacancy) return true
+                return false
+            }
+            const repetead_vacancies_registered = vacancy_id_set.filter(checkRepeatedVacancys)
+            if (repetead_vacancies_registered.length > 0) return res.status(404).send("Voce so pode ter uma candidatura por vaga.")
+
+        }
+        catch (e) {
+            return res.status(500).send("Erro Interno.  " + e)
+        }
+
+
+        const job_application_set = vacancy_id_set.map((vacancy) => {
+            return {
                 applied_at: new Date(),
                 candidate_id: candidate.id,
                 vacancy_id: vacancy,
                 current_stage: 0,// [***] Ver se nao vou deletar
                 stage: 'Em Andamento' //[***] Ver se n vou deletar
-            })
+            }
         })
-        
         app.db('job_applications').insert(job_application_set)
-        .then(_ => res.status(204).send("Candidaturas cadastradas com sucesso."))
-        .catch(err => res.status(500).send("Nao foi possivel cadastrar as candidaturas. "))
+            .then(_ => res.status(204).send("Candidaturas cadastradas com sucesso."))
+            .catch(err => res.status(500).send("Nao foi possivel cadastrar as candidaturas. "))
     }
-    
-   
+
+
     const editApplicationStage = async (req, res) => {
         const application = {
             id: req.body.id,

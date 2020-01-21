@@ -42,6 +42,7 @@ module.exports = app => {
       .post(accessLevel(app.api.administrators.save).admin()) // [--] Tested
       .get(accessLevel(app.api.administrators.get).admin())  // [--] Tested
       .put(accessLevel(app.api.administrators.save).admin()) //[--] Tested
+      .delete(accessLevel(app.api.administrators.remove).admin())
    //.delete()
 
    app.route('/vacancy/getById/:id')
@@ -57,7 +58,7 @@ module.exports = app => {
 
 // getAllCandidatesJobApplicationByID,getJobApplicationById, save
 
-   app.route('/application/getAllById/:vacancy_id')
+   app.route('/application/getAllById')
       .all(app.config.passport.authenticate())
       .get(accessLevel(app.api.job_applications.getAllCandidatesJobApplicationByID).candidate())  //[--] Tested 
 

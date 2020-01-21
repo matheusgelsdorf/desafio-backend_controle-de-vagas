@@ -109,20 +109,17 @@ module.exports = app => {
             .catch(() => res.status(502).send())
     }
 
-   /* const remove = (req, res) => {
+     const remove = (req, res) => {
         const administrator = { ...req.body }
         app.db('administrators')
             .where({ id: administrator.id })
-            .whereNull('deleted_at')
             .first()
-            .update({ deleted_at: new Date() })
-            .then(() => res.status(204).send())
-            .catch((e) => {
-                res.status(501).send()
-            }
-            )
-    }*/
+            .del()
+            .then(_ => res.status(204).send())
+            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+            
+    }
 
-    return { getAdministratorByCpf, save, get}
+    return { getAdministratorByCpf, save, get,remove}
 }
 
