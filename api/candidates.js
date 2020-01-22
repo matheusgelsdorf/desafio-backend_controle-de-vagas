@@ -14,7 +14,7 @@ module.exports = app => {
 
         if (candidate.registered_at) delete candidate['registered_at']
 
-        if (candidate.deleted_at) delete candidate['deleted_at']
+     // --==--   if (candidate.deleted_at) delete candidate['deleted_at']
 
         /* Validações */
 
@@ -68,7 +68,7 @@ module.exports = app => {
         if (req.method === "PUT") {
             app.db('candidates')
                 .where({ id: candidate_token.id })
-                .whereNull('deleted_at')
+             // --==--   .whereNull('deleted_at')
                 .first()
                 .update(candidate)
                 .then(() => {
@@ -97,7 +97,7 @@ module.exports = app => {
 
         app.db('candidates')
             .where({ cpf })
-            .whereNull('deleted_at')
+       // --==--     .whereNull('deleted_at')
             .first()
             .then(candidate_from_db => {
                 let candidate = {
@@ -116,7 +116,7 @@ module.exports = app => {
     const get = (req, res) => {
         app.db('candidates')
             .select('id', 'name', 'cpf', 'email', 'phone')
-            .whereNull('deleted_at')
+    // --==--        .whereNull('deleted_at')
             .then(candidates => res.json(candidates))
             .catch(() => res.status(502).send())
     }
@@ -125,9 +125,9 @@ module.exports = app => {
          const candidate = { ...req.body }
          app.db('candidates')
              .where({ id: candidate.id })
-             .whereNull('deleted_at')
+       // --==--      .whereNull('deleted_at')
              .first()
-             .update({ deleted_at: new Date() })
+             .update({ : new Date() })
              .then(() => res.status(204).send())
              .catch((e) => {
                  res.status(501).send()

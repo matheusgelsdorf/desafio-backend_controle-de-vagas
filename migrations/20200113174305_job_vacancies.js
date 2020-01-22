@@ -3,7 +3,7 @@ exports.up = function (knex) {
         table.increments('id').primary()
         
         table.timestamp('created_at').notNull()
-        table.timestamp('deleted_at')
+    // --==--    table.timestamp('deleted_at')
 
         table.integer('admin_id').unsigned().notNull().references('id').inTable('administrators').onDelete('CASCADE').onUpdate('CASCADE')
         

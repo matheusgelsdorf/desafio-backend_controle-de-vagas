@@ -9,7 +9,7 @@ module.exports = app => {
 
         if (job_vacancy.created_at) delete job_vacancy['created_at']
 
-        if (job_vacancy.deleted_at) delete job_vacancy['deleted_at']
+      // --==--  if (job_vacancy.deleted_at) delete job_vacancy['deleted_at']
 
         /* Validações */
 
@@ -47,7 +47,7 @@ module.exports = app => {
                 await app.db('job_vacancies')
                     .select(["admin_id"])
                     .where({ id: job_vacancy.id })
-                    .whereNull('deleted_at')
+           // --==--         .whereNull('deleted_at')
                     .first()
                     .then(vacancy_from_db => {
                         job_vacancy.admin_id = vacancy_from_db.admin_id
@@ -61,7 +61,7 @@ module.exports = app => {
 
             app.db('job_vacancies')
                 .where({ id: job_vacancy.id, admin_id: admin_token.id })
-                .whereNull('deleted_at')
+        // --==--        .whereNull('deleted_at')
                 .first()
                 .update(job_vacancy)
                 .then(() => {
@@ -86,7 +86,7 @@ module.exports = app => {
 
         app.db('job_vacancies')
             .where({ id })
-            .whereNull('deleted_at')
+    // --==--        .whereNull('deleted_at')
             .first()
             .then(job_vacancy_from_db => {
                 let job_vacancy = {
@@ -105,7 +105,7 @@ module.exports = app => {
     const get = (req, res) => {
         app.db('job_vacancies')
             .select('id', 'title', 'description', 'recruitment_stages', 'open_vacancies', 'admin_id', 'created_at')
-            .whereNull('deleted_at')
+    // --==--        .whereNull('deleted_at')
             .then(job_vacancies => res.json(job_vacancies))
             .catch(() => res.status(502).send())
     }

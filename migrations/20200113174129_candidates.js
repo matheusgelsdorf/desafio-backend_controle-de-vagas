@@ -3,7 +3,7 @@ exports.up = function(knex) {
         table.increments('id').primary()
         
         table.timestamp('registered_at').notNull()
-        table.timestamp('deleted_at')
+    // --==--    table.timestamp('deleted_at')
 
         table.string('name').notNull()
         table.string('email').notNull().unique()

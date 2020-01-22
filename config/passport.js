@@ -20,7 +20,7 @@ module.exports = app => {
         if (payload.isAdmin) {
             app.db('administrators')
                 .where({ id: payload.id })
-                .whereNull("deleted_at")
+    // --==--            .whereNull("deleted_at")
                 .first()
                 .then(admin_from_db => {
                 
@@ -47,7 +47,7 @@ module.exports = app => {
 
             app.db('candidates')
                 .where({ id: payload.id })
-                .whereNull("deleted_at")
+     // --==--           .whereNull("deleted_at")
                 .first()
                 .then(candidate_from_db => {
                     if (

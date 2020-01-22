@@ -18,7 +18,7 @@ module.exports = app => {
 
         const candidate = await app.db('candidates')
             .where({ email: req.body.email })
-            .whereNull('deleted_at')
+        // --==--    .whereNull('deleted_at')
             .first()
             .catch(_ => res.status(500).send('Erro interno.'))
 
@@ -58,7 +58,7 @@ module.exports = app => {
 
         const admin = await app.db('administrators')
             .where({ email: req.body.email })
-            .whereNull('deleted_at')
+        // --==--    .whereNull('deleted_at')
             .first()
             .catch(_ => res.status(500).send('Erro interno.'))
 
@@ -105,7 +105,7 @@ module.exports = app => {
                 if (new Date(token.exp * 1000) > new Date()) {
 
                     const user_from_db = await app.db(table_id)
-                        .whereNull('deleted_at')
+               // --==--         .whereNull('deleted_at')
                         .where({ id: token.id })
                         .first()
                     if ((token.name === user_from_db.name) &&

@@ -20,7 +20,7 @@ module.exports = app => {
             const job_application_from_db_set = await app.db('job_applications')
                 .select(['vacancy_id'])
                 .where({ candidate_id: candidate.id })
-                .whereNull('deleted_at')
+        // --==--        .whereNull('deleted_at')
 
 
             console.log(job_application_from_db_set)
@@ -81,7 +81,7 @@ module.exports = app => {
             await app.db('job_applications')
                 .select(["vacancy_id"])
                 .where({ id: application.id })
-                .whereNull('deleted_at')
+        // --==--        .whereNull('deleted_at')
                 .first()
                 .then(application_from_db => {
                     vacancy_id = application_from_db.vacancy_id
@@ -92,7 +92,7 @@ module.exports = app => {
             await app.db('job_vacancies')
                 .select(["admin_id"])
                 .where({ id: vacancy_id })
-                .whereNull('deleted_at')
+        // --==--        .whereNull('deleted_at')
                 .first()
                 .then((vacancy_from_db => {
                     application.admin_id = vacancy_from_db.admin_id
@@ -107,7 +107,7 @@ module.exports = app => {
 
         app.db('job_applications')
             .where({ id: application.id })
-            .whereNull('deleted_at')
+     // --==--       .whereNull('deleted_at')
             .first()
             .update({ stage: application.stage })
             .then(() => {
@@ -126,10 +126,10 @@ module.exports = app => {
 
         app.db('job_applications')
             .where({ id })
-            .whereNull('deleted_at')
+    // --==--        .whereNull('deleted_at')
             .first()
             .then(job_application_from_db => {
-                delete job_application_from_db['deleted_at']
+    // --==--            delete job_application_from_db['']
                 if (!access_token.isAdmin && job_application_from_db.candidate_id !== access_token.id) {
                     return res.status(401).send('Voce nao tem permissao de acessar essa candidatura.')
                 }
@@ -147,7 +147,7 @@ module.exports = app => {
         app.db('job_applications')
             .select('id', 'applied_at', 'candidate_id', 'vacancy_id', 'current_stage', 'stage') //[***] Current stage e status ver se nao vou deletar
             .where({ candidate_id })
-            .whereNull('deleted_at')
+    // --==--        .whereNull('deleted_at')
             .then(job_application_from_db_set => {
                 return res.json(job_application_from_db_set)
             })

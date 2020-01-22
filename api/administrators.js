@@ -14,7 +14,7 @@ module.exports = app => {
 
         if (administrator.registered_at) delete administrator['registered_at']
 
-        if (administrator.deleted_at) delete administrator['deleted_at']
+// --==--        if (administrator.deleted_at) delete administrator['deleted_at']
 
         /* Validações */
 
@@ -61,7 +61,7 @@ module.exports = app => {
         if (req.method === "PUT") {
             app.db('administrators')
                 .where({ id: administrator_token.id })
-                .whereNull('deleted_at')
+             // --==--   .whereNull('deleted_at')
                 .first()
                 .update(administrator)
                 .then(() => {
@@ -85,7 +85,7 @@ module.exports = app => {
 
         app.db('administrators')
             .where({ cpf })
-            .whereNull('deleted_at')
+       // --==--     .whereNull('deleted_at')
             .first()
             .then(administrator_from_db => {
                 let administrator = {
@@ -104,7 +104,7 @@ module.exports = app => {
     const get = (req, res) => {
         app.db('administrators')
             .select('id', 'name', 'cpf', 'email', 'phone')
-            .whereNull('deleted_at')
+         // --==--   .whereNull('deleted_at')
             .then(administrators => res.json(administrators))
             .catch(() => res.status(502).send())
     }

@@ -24,7 +24,7 @@ module.exports = app => {
 
         const admin = await app.db('administrators')
             .where({ email: 'admin@admin.com' })
-            .whereNull('deleted_at')
+   // --==--         .whereNull('deleted_at')
             .first()
             .catch(() => console.log("Admin já cadastrado!"))
 
