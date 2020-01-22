@@ -135,6 +135,18 @@ module.exports = app => {
              )
      }*/
 
-    return { getCandidateByCpf, save, get }
+    const remove = (req, res) => {
+        const candidate = { ...req.user }
+
+        app.db('candidates')
+            .where({ id: candidate.id })
+            .first()
+            .del()
+            .then(_ => res.status(204).send())
+            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+
+    }
+
+    return { getCandidateByCpf, save, get, remove }
 }
 

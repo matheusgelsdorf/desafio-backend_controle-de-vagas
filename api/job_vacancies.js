@@ -123,7 +123,21 @@ module.exports = app => {
              }
              )
      }*/
+     const remove = async(req, res) => {
 
-    return { getJobVacancyById, save, get }
+
+        const administrator_token = {...req.user}
+        const vacancy= {...req.body}
+
+        app.db('job_vacancies')
+            .where({id: vacancy.id, admin_id:administrator_token.id})
+            .first()
+            .del()
+            .then(_ => res.status(204).send(_))
+            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+
+    }
+
+    return { getJobVacancyById, save, get, remove}
 }
 

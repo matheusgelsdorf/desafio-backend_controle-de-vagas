@@ -169,6 +169,21 @@ module.exports = app => {
              )
      }*/
 
-    return { getAllCandidatesJobApplicationByID, getJobApplicationById, save, editApplicationStage }
+     const remove = async(req, res) => {
+
+
+        const candidate_token = {...req.user}
+        const application= {...req.body}
+
+        app.db('job_applications')
+            .where({id: application.id, candidate_id:candidate_token.id})
+            .first()
+            .del()
+            .then(_ => res.status(204).send(_))
+            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+
+    }
+     
+    return { getAllCandidatesJobApplicationByID, getJobApplicationById, save, editApplicationStage, remove}
 }
 

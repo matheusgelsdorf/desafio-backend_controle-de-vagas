@@ -9,8 +9,8 @@ module.exports = app => {
 
 
     const save = (req, res) => {
-        const administrator = {...req.body}
-        const administrator_token = {...req.user }
+        const administrator = { ...req.body }
+        const administrator_token = { ...req.user }
 
         if (administrator.registered_at) delete administrator['registered_at']
 
@@ -20,7 +20,7 @@ module.exports = app => {
 
         try {
             if (req.method === "PUT") {
-                app.api.validation.existsOrError(administrator,"Insira os dados que deseja atualizar.")
+                app.api.validation.existsOrError(administrator, "Insira os dados que deseja atualizar.")
                 //name 
                 if (administrator.name || administrator.name === "") app.api.validation.existsOrError(administrator.name, "Insira um nome.")
                 //cpf
@@ -81,8 +81,8 @@ module.exports = app => {
 
     const getAdministratorByCpf = (req, res) => {
 
-        const cpf=req.user.cpf
-        
+        const cpf = req.user.cpf
+
         app.db('administrators')
             .where({ cpf })
             .whereNull('deleted_at')
@@ -109,17 +109,29 @@ module.exports = app => {
             .catch(() => res.status(502).send())
     }
 
-     const remove = (req, res) => {
-        const administrator = { ...req.body }
+    const remove = (req, res) => {
+
+
+        const administrator = app.config.rootAdmin.isRootAdmin(req.user) ? { ...req.body } : { ...req.user }
+
+        if (app.config.rootAdmin.isRootAdmin(administrator)) {
+            try {
+                app.api.validation.existsOrError(administrator.id, "Insira um id de um administrador.")
+            }
+            catch (e) {
+                return res.status(404).send(e)
+            }
+        }
+
         app.db('administrators')
             .where({ id: administrator.id })
             .first()
             .del()
             .then(_ => res.status(204).send())
             .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
-            
+
     }
 
-    return { getAdministratorByCpf, save, get,remove}
+    return { getAdministratorByCpf, save, get, remove }
 }
 

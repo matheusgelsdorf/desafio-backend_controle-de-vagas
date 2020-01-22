@@ -125,6 +125,20 @@ module.exports = app => {
              )
      }*/
 
-    return { getAllApplicationsCommentsById, getCommentById, save }
+     const remove = async(req, res) => {
+
+
+        const admin_token = {...req.user}
+        const comment= {...req.body}
+
+        app.db('comments')
+            .where({id: comment.id, admin_id:admin_token.id})
+            .first()
+            .del()
+            .then(_ => res.status(204).send(_))
+            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+
+    }
+    return { getAllApplicationsCommentsById, getCommentById, save, remove }
 }
 
