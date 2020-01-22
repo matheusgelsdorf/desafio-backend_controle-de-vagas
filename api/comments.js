@@ -135,8 +135,8 @@ module.exports = app => {
             .where({id: comment.id, admin_id:admin_token.id})
             .first()
             .del()
-            .then(_ => res.status(204).send(_))
-            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+            .then(_ => res.status(204).send())
+            .catch(e => res.status(500).send('Nao foi possivel remover comentario.'))
 
     }
     return { getAllApplicationsCommentsById, getCommentById, save, remove }

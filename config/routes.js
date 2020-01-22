@@ -30,7 +30,7 @@ module.exports = app => {
       .all(app.config.passport.authenticate())
       .get(accessLevel(app.api.candidates.get).admin())  //[--] Tested
       .put(accessLevel(app.api.candidates.save).candidate()) //[--] Tested 
-      .delete(accessLevel(app.api.candidates.remove).candidate())
+      .delete(accessLevel(app.api.candidates.remove).candidate()) //[--] Tested 
 
    app.route('/admin/getByCpf')
       .all(app.config.passport.authenticate())
@@ -42,7 +42,7 @@ module.exports = app => {
       .post(accessLevel(app.api.administrators.save).admin()) // [--] Tested
       .get(accessLevel(app.api.administrators.get).admin())  // [--] Tested
       .put(accessLevel(app.api.administrators.save).admin()) //[--] Tested
-      .delete(accessLevel(app.api.administrators.remove).admin())
+      .delete(accessLevel(app.api.administrators.remove).admin()) //[--] Tested 
    //.delete()
 
    app.route('/vacancy/getById/:id')
@@ -54,7 +54,7 @@ module.exports = app => {
       .post(accessLevel(app.api.job_vacancies.save).admin())  // [--] Tested 
       .get(app.api.job_vacancies.get) // [--] Tested
       .put(accessLevel(app.api.job_vacancies.save).admin()) // [--] Tested
-      .delete(accessLevel(app.api.job_vacancies.remove).admin())
+      .delete(accessLevel(app.api.job_vacancies.remove).admin()) // [--] Tested
 
 // getAllCandidatesJobApplicationByID,getJobApplicationById, save
 
@@ -71,7 +71,7 @@ module.exports = app => {
       .all(app.config.passport.authenticate())
       .post(accessLevel(app.api.job_applications.save).candidate()) //[--] Tested
       .put(accessLevel(app.api.job_applications.editApplicationStage).admin()) //[--] Tested
-      .delete(accessLevel(app.api.job_applications.remove).candidate())
+      .delete(accessLevel(app.api.job_applications.remove).candidate()) //[--] Tested
 
    app.route('/comment/getById/:id')
       .all(app.config.passport.authenticate())
@@ -87,7 +87,7 @@ module.exports = app => {
       .all(app.config.passport.authenticate())
       .post(accessLevel(app.api.comments.save).admin()) //[--] Tested
       .put(accessLevel(app.api.comments.save).admin()) //[--] Tested
-      .delete(accessLevel(app.api.comments.remove).admin())
+      .delete(accessLevel(app.api.comments.remove).admin()) //[--] Tested
       
    //.delete()
 

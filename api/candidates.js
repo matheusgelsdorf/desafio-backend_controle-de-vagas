@@ -143,7 +143,7 @@ module.exports = app => {
             .first()
             .del()
             .then(_ => res.status(204).send())
-            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+            .catch(_ => res.status(500).send('Nao foi possivel remover candidato.'))
 
     }
 

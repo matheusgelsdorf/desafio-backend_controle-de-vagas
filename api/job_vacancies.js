@@ -128,13 +128,12 @@ module.exports = app => {
 
         const administrator_token = {...req.user}
         const vacancy= {...req.body}
-
         app.db('job_vacancies')
             .where({id: vacancy.id, admin_id:administrator_token.id})
             .first()
             .del()
-            .then(_ => res.status(204).send(_))
-            .catch(_ => res.status(500).send('Nao foi possivel remover administrador.'))
+            .then(_ => res.status(204).send())
+            .catch(e => res.status(500).send('Nao foi possivel remover vaga.'))
 
     }
 
