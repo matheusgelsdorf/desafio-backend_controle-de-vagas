@@ -139,6 +139,7 @@ module.exports = app => {
             const candidates = await app.db('candidates')
                 .select(['id', 'name', 'email', 'phone','cpf'])
                 .whereIn('id', applications_candidates_array)
+                 // --==--        .whereNull('deleted_at')
 
             console.log('candidates')
             console.log(candidates)

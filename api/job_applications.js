@@ -119,23 +119,35 @@ module.exports = app => {
     }
 
 
-    const getJobApplicationById = (req, res) => {
+    const getJobApplicationById = async (req, res) => {
         const access_token = { ...req.user }
 
         const id = req.params.id
 
-        app.db('job_applications')
-            .where({ id })
-            // --==--        .whereNull('deleted_at')
-            .first()
-            .then(job_application_from_db => {
-                // --==--            delete job_application_from_db['']
-                if (!access_token.isAdmin && job_application_from_db.candidate_id !== access_token.id) {
-                    return res.status(401).send('Voce nao tem permissao de acessar essa candidatura.')
-                }
-                return res.json(job_application_from_db)
-            })
-            .catch(err => res.status(500).send())
+        try {
+            const job_application_from_db = await app.db('job_applications')
+                .where({ id })
+                // --==--        .whereNull('deleted_at')
+                .first()
+
+            if(!job_application_from_db) res.status(404).send('Candidatura nao encontrada.')
+            
+            if (!access_token.isAdmin && job_application_from_db.candidate_id !== access_token.id) {
+                return res.status(401).send('Voce nao tem permissao de acessar essa candidatura 1.')
+            }
+            const vacancy_from_db= await app.db('job_vacancies')
+                .where({id:job_application_from_db.vacancy_id})
+                 // --==--        .whereNull('deleted_at')
+                .first()
+
+            if(access_token.isAdmin  && vacancy_from_db.admin_id !== access_token.id) return res.status(401).send('Voce nao tem permissao de acessar essa candidatura.')
+
+            return res.json(job_application_from_db)
+
+        }
+        catch (e) {
+            return res.status(500).send('Erro interno.' + e)
+        }
 
     }
 
@@ -155,7 +167,7 @@ module.exports = app => {
 
     }
 
-   
+
 
     const remove = async (req, res) => {
 
