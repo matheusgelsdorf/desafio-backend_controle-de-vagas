@@ -56,7 +56,16 @@ module.exports = app => {
       .put(accessLevel(app.api.job_vacancies.save).admin()) // [--] Tested
       .delete(accessLevel(app.api.job_vacancies.remove).admin()) // [--] Tested
 
-// getAllCandidatesJobApplicationByID,getJobApplicationById, save
+   app.route('/vacancy/getAllVacancyCandidates/:vacancy_id')
+      .all(app.config.passport.authenticate())
+      .get(accessLevel(app.api.job_vacancies.getAllVacancyCandidates).admin()) // [--] Tested
+
+      app.route('/vacancy/getAllAdminVacancies')
+      .all(app.config.passport.authenticate())
+      .get(accessLevel(app.api.job_vacancies.getAllAdminVacancies).admin()) // [--] Tested
+
+   // getAllCandidatesJobApplicationByID,getJobApplicationById, save
+
 
    app.route('/application/getAllById')
       .all(app.config.passport.authenticate())
@@ -66,6 +75,8 @@ module.exports = app => {
    app.route('/application/getById/:id')
       .all(app.config.passport.authenticate())
       .get(app.api.job_applications.getJobApplicationById) //[--] Tested
+
+
 
    app.route('/application')
       .all(app.config.passport.authenticate())
@@ -88,7 +99,7 @@ module.exports = app => {
       .post(accessLevel(app.api.comments.save).admin()) //[--] Tested
       .put(accessLevel(app.api.comments.save).admin()) //[--] Tested
       .delete(accessLevel(app.api.comments.remove).admin()) //[--] Tested
-      
+
    //.delete()
 
 

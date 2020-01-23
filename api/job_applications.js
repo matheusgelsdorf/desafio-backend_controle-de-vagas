@@ -20,22 +20,22 @@ module.exports = app => {
             const job_application_from_db_set = await app.db('job_applications')
                 .select(['vacancy_id'])
                 .where({ candidate_id: candidate.id })
-        // --==--        .whereNull('deleted_at')
+            // --==--        .whereNull('deleted_at')
 
 
             console.log(job_application_from_db_set)
-            const checkRepeatedVacancys= (vacancy_id) => {
-                const exists_vacancy=job_application_from_db_set.find(
+            const checkRepeatedVacancys = (vacancy_id) => {
+                const exists_vacancy = job_application_from_db_set.find(
                     (vacancy_from_db) => {
-                        if(vacancy_from_db.vacancy_id === vacancy_id) return true
+                        if (vacancy_from_db.vacancy_id === vacancy_id) return true
                         return false
-                    }    
+                    }
                 )
                 if (exists_vacancy) return true
                 return false
             }
             const repetead_vacancies_registered = vacancy_id_set.filter(checkRepeatedVacancys)
-            if (repetead_vacancies_registered.length > 0) return res.status(404).send("Voce so pode ter uma candidatura por vaga.")
+            if (repetead_vacancies_registered.length > 0) return res.status(400).send("Voce so pode ter uma candidatura por vaga.")
 
         }
         catch (e) {
@@ -73,7 +73,7 @@ module.exports = app => {
 
         }
         catch (e) {
-            return res.status(404).send(e)
+            return res.status(400).send(e)
         }
 
         try {
@@ -81,7 +81,7 @@ module.exports = app => {
             await app.db('job_applications')
                 .select(["vacancy_id"])
                 .where({ id: application.id })
-        // --==--        .whereNull('deleted_at')
+                // --==--        .whereNull('deleted_at')
                 .first()
                 .then(application_from_db => {
                     vacancy_id = application_from_db.vacancy_id
@@ -92,7 +92,7 @@ module.exports = app => {
             await app.db('job_vacancies')
                 .select(["admin_id"])
                 .where({ id: vacancy_id })
-        // --==--        .whereNull('deleted_at')
+                // --==--        .whereNull('deleted_at')
                 .first()
                 .then((vacancy_from_db => {
                     application.admin_id = vacancy_from_db.admin_id
@@ -107,7 +107,7 @@ module.exports = app => {
 
         app.db('job_applications')
             .where({ id: application.id })
-     // --==--       .whereNull('deleted_at')
+            // --==--       .whereNull('deleted_at')
             .first()
             .update({ stage: application.stage })
             .then(() => {
@@ -126,10 +126,10 @@ module.exports = app => {
 
         app.db('job_applications')
             .where({ id })
-    // --==--        .whereNull('deleted_at')
+            // --==--        .whereNull('deleted_at')
             .first()
             .then(job_application_from_db => {
-    // --==--            delete job_application_from_db['']
+                // --==--            delete job_application_from_db['']
                 if (!access_token.isAdmin && job_application_from_db.candidate_id !== access_token.id) {
                     return res.status(401).send('Voce nao tem permissao de acessar essa candidatura.')
                 }
@@ -147,7 +147,7 @@ module.exports = app => {
         app.db('job_applications')
             .select('id', 'applied_at', 'candidate_id', 'vacancy_id', 'current_stage', 'stage') //[***] Current stage e status ver se nao vou deletar
             .where({ candidate_id })
-    // --==--        .whereNull('deleted_at')
+            // --==--        .whereNull('deleted_at')
             .then(job_application_from_db_set => {
                 return res.json(job_application_from_db_set)
             })
@@ -155,35 +155,23 @@ module.exports = app => {
 
     }
 
-    /* const remove = (req, res) => {
-         const job_application = { ...req.body }
-         app.db('job_vacancies')
-             .where({ id: job_application.id })
-             .whereNull('deleted_at')
-             .first()
-             .update({ deleted_at: new Date() })
-             .then(() => res.status(204).send())
-             .catch((e) => {
-                 res.status(501).send()
-             }
-             )
-     }*/
+   
 
-     const remove = async(req, res) => {
+    const remove = async (req, res) => {
 
 
-        const candidate_token = {...req.user}
-        const application= {...req.body}
+        const candidate_token = { ...req.user }
+        const application = { ...req.body }
 
         app.db('job_applications')
-            .where({id: application.id, candidate_id:candidate_token.id})
+            .where({ id: application.id, candidate_id: candidate_token.id })
             .first()
             .del()
             .then(_ => res.status(204).send())
             .catch(_ => res.status(500).send('Nao foi possivel remover candidatura.'))
 
     }
-     
-    return { getAllCandidatesJobApplicationByID, getJobApplicationById, save, editApplicationStage, remove}
+
+    return { getAllCandidatesJobApplicationByID, getJobApplicationById, save, editApplicationStage, remove }
 }
 

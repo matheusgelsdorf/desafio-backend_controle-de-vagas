@@ -107,22 +107,96 @@ module.exports = app => {
             .select('id', 'title', 'description', 'recruitment_stages', 'open_vacancies', 'admin_id', 'created_at')
     // --==--        .whereNull('deleted_at')
             .then(job_vacancies => res.json(job_vacancies))
-            .catch(() => res.status(502).send())
+            .catch(() => res.status(500).send())
+    }
+    
+    const getAllVacancyCandidates = async (req, res) => {
+        const vacancy_id = req.params.vacancy_id 
+        const admin = { ...req.user }
+
+        try {
+            const vacancy = await app.db('job_vacancies')
+                .select(['admin_id'])
+                .where({ id: vacancy_id })
+                // --==--        .whereNull('deleted_at')
+                .first()
+            
+                console.log(vacancy)
+
+            if (!vacancy) return res.status(404).send('Vaga nao encontrada.')
+            if (vacancy.admin_id !== admin.id) return res.status(401).send('Voce so pode acessar dados sobre vagas de sua autoria.')
+
+            const applications = await app.db('job_applications')
+                .select(['id','candidate_id', 'stage', 'applied_at'])
+                .where({ vacancy_id })
+            // --==--        .whereNull('deleted_at')
+
+            console.log('Aqui1')
+            if (applications.length === 0) return res.status(400).send('Nao foram encontradas candidaturas.')
+
+            const applications_candidates_array = applications.map((application) => application.candidate_id)
+
+            const candidates = await app.db('candidates')
+                .select(['id', 'name', 'email', 'phone','cpf'])
+                .whereIn('id', applications_candidates_array)
+
+            console.log('candidates')
+            console.log(candidates)
+
+            const data = applications.map(application => {
+
+                candidate_to_send = candidates.find(candidate => {
+                    if (candidate.id === application.candidate_id) return true
+                    return false
+                })
+                console.log('candidate.find')
+                console.log(candidate_to_send)
+                delete candidate_to_send['id']
+
+                return {
+                    application: {
+                        id:application.id,
+                        stage: application.stage,
+                        applied_at: application.applied_at
+                    },
+                    candidate: { ...candidate_to_send }
+                }
+
+            })
+
+            console.log('data')
+            console.log(data)
+            
+            return res.json(data)
+            
+
+
+
+        }
+        catch (e) {
+            return res.status(500).send('Erro interno.' + e )
+        }
+
+
     }
 
-    /* const remove = (req, res) => {
-         const job_vacancy = { ...req.body }
-         app.db('job_vacancies')
-             .where({ id: job_vacancy.id })
-             .whereNull('deleted_at')
-             .first()
-             .update({ deleted_at: new Date() })
-             .then(() => res.status(204).send())
-             .catch((e) => {
-                 res.status(501).send()
-             }
-             )
-     }*/
+    const getAllAdminVacancies=async(req,res) => {
+        const admin_token = {...req.user}
+        try{
+        const vacancies= await app.db('job_vacancies')
+            .select(['id','created_at','title','description'])
+            .where({admin_id:admin_token.id})
+        
+            if(vacancies.length === 0) return res.status(404).send('Nao foram encontradas vagas.')
+            return res.json(vacancies)
+        }
+        catch(e){
+            return res.status(500).send('Erro interno')
+        }
+            
+
+    } 
+
      const remove = async(req, res) => {
 
 
@@ -137,6 +211,6 @@ module.exports = app => {
 
     }
 
-    return { getJobVacancyById, save, get, remove}
+    return { getJobVacancyById, save, get, remove,getAllVacancyCandidates, getAllAdminVacancies}
 }
 
