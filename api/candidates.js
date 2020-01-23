@@ -14,30 +14,23 @@ module.exports = app => {
 
         if (candidate.registered_at) delete candidate['registered_at']
 
-     // --==--   if (candidate.deleted_at) delete candidate['deleted_at']
 
-        /* Validações */
 
         try {
             if (req.method === "PUT") {
                 app.api.validation.existsOrError(candidate, "Insira os dados que deseja atualizar.")
-                //name
                 if (candidate.name) app.api.validation.existsOrError(candidate.name, "Insira um nome.")
-                //cpf
                 if (candidate.cpf) app.api.validation.existsOrError(candidate.cpf, "Insira o cpf.")
-                //email
                 if (candidate.email) {
                     app.api.validation.existsOrError(candidate.email, "Insira um email válido.")
                     app.api.validation.validateEmail(candidate.email, "Email inválido.")
                 }
-                //senha
                 if (candidate.password) {
 
                     app.api.validation.existsOrError(candidate.password, "Insira uma senha válida.")
                     app.api.validation.existsOrError(candidate.confirmPassword, "Confirme a senha.")
                     app.api.validation.equalsOrError(candidate.password, candidate.confirmPassword, 'Senhas nao conferem.')
                 }
-                //phone
                 if (candidate.phone) app.api.validation.existsOrError(candidate.phone, "Insira um número de telefone")
 
             }
@@ -57,18 +50,16 @@ module.exports = app => {
         catch (e) {
             return res.status(400).send(e)
         }
-        /* ---------------- */
 
 
 
-        if (candidate.password) candidate.password = encryptPassword(candidate.password) // caso o metodo for PUT
+        if (candidate.password) candidate.password = encryptPassword(candidate.password)
         delete candidate['confirmPassword']
 
 
         if (req.method === "PUT") {
             app.db('candidates')
                 .where({ id: candidate_token.id })
-             // --==--   .whereNull('deleted_at')
                 .first()
                 .update(candidate)
                 .then(() => {
@@ -97,7 +88,6 @@ module.exports = app => {
 
         app.db('candidates')
             .where({ cpf })
-       // --==--     .whereNull('deleted_at')
             .first()
             .then(candidate_from_db => {
                 let candidate = {
@@ -116,24 +106,11 @@ module.exports = app => {
     const get = (req, res) => {
         app.db('candidates')
             .select('id', 'name', 'cpf', 'email', 'phone')
-    // --==--        .whereNull('deleted_at')
             .then(candidates => res.json(candidates))
             .catch(() => res.status(502).send())
     }
 
-    /* const remove = (req, res) => {
-         const candidate = { ...req.body }
-         app.db('candidates')
-             .where({ id: candidate.id })
-       // --==--      .whereNull('deleted_at')
-             .first()
-             .update({ : new Date() })
-             .then(() => res.status(204).send())
-             .catch((e) => {
-                 res.status(501).send()
-             }
-             )
-     }*/
+
 
     const remove = (req, res) => {
         const candidate = { ...req.user }

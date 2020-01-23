@@ -18,13 +18,11 @@ module.exports = app => {
     }
 
 
-    //-- cadastrando o usuario root
     const registerRootAdmin = async () => {
         await app.db.migrate.latest([config])
 
         const admin = await app.db('administrators')
             .where({ email: 'admin@admin.com' })
-   // --==--         .whereNull('deleted_at')
             .first()
             .catch(() => console.log("Admin já cadastrado!"))
 
@@ -49,4 +47,3 @@ module.exports = app => {
 
     return { registerRootAdmin, isRootAdmin }
 }
-//--

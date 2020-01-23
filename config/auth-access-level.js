@@ -2,7 +2,7 @@ module.exports = (middleware) => {
 
     const admin = function () {
         return (req, res, next) => {
-            
+
             if (req.user.isAdmin) {
                 middleware(req, res, next)
             }
@@ -15,7 +15,7 @@ module.exports = (middleware) => {
 
     const candidate = function () {
         return (req, res, next) => {
-            
+
             if (!req.user.isAdmin) {
                 middleware(req, res, next)
             }
@@ -24,6 +24,6 @@ module.exports = (middleware) => {
             }
         }
     }
-    return { admin,candidate }
+    return { admin, candidate }
 
 }

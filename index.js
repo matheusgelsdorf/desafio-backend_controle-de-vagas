@@ -5,11 +5,10 @@ const db = require('./config/db')
 
 app.db = db
 consign()
-    .then('./config/rootAdmin.js') //[***]
-    .then('./config/passport.js') //[***]
+    .then('./config/rootAdmin.js')
+    .then('./config/passport.js')
     .then('./config/middlewares.js')
     .then('./api/validation.js')
-    //.then('./schedule')   //[***]
     .then('./api')
     .then('./config/routes.js')
     .into(app)
@@ -18,6 +17,6 @@ consign()
 app.config.rootAdmin.registerRootAdmin()
 
 app.listen(port, () => {
-console.log(`Backend Executando na porta ${port}` )
+    console.log(`Backend Executando na porta ${port}`)
 })
 

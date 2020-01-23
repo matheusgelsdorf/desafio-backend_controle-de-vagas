@@ -6,10 +6,8 @@ module.exports = app => {
 
         if (comment.registered_at) delete comment['posted_at']
 
-      // --==--  if (comment.deleted_at) delete comment['deleted_at']
         if (comment.edited_at) delete comment['edited_at']
 
-        /* Validações */
 
         try {
             if (req.method === "PUT") {
@@ -29,7 +27,6 @@ module.exports = app => {
         catch (e) {
             return res.status(400).send(e)
         }
-        /* ---------------- */
 
 
 
@@ -40,16 +37,14 @@ module.exports = app => {
                 content: comment.content
             }
             try {
-               const comment_from_db= await app.db('comments')
+                const comment_from_db = await app.db('comments')
                     .where({ id: comment_edited.id })
-          // --==--          .whereNull('deleted_at')
                     .first()
-                    
-                    if (!comment_from_db || comment_from_db === {} || (admin.id !== comment_from_db.admin_id)) return res.status(403).send("Usuário não tem permissão para editar esse comentário.")
-                    
-                    await app.db('comments')
+
+                if (!comment_from_db || comment_from_db === {} || (admin.id !== comment_from_db.admin_id)) return res.status(403).send("Usuário não tem permissão para editar esse comentário.")
+
+                await app.db('comments')
                     .where({ id: comment_edited.id })
-          // --==--          .whereNull('deleted_at')
                     .first()
                     .update(comment_edited)
                     .then(() => {
@@ -66,7 +61,6 @@ module.exports = app => {
             const comment_to_save = {
                 posted_at: new Date(),
                 edited_at: null,
-        // --==--        deleted_at: null,
                 admin_id: admin.id,
                 application_id: comment.application_id,
                 content: comment.content
@@ -84,10 +78,8 @@ module.exports = app => {
 
         app.db('comments')
             .where({ id })
-     // --==--       .whereNull('deleted_at')
             .first()
             .then(comment_from_db => {
-     // --==--           delete comment_from_db['deleted_at']
                 return res.json(comment_from_db)
             })
             .catch(err => res.status(500).send("Nao foi possivel encontrar comentário. Verifique se os dados fornecidos estâo corretos."))
@@ -101,7 +93,6 @@ module.exports = app => {
         app.db('comments')
             .select('id', 'posted_at', 'edited_at', 'content', 'application_id')
             .where({ application_id })
-    // --==--        .whereNull('deleted_at')
             .then(comment_from_db_set => {
                 return res.json(comment_from_db_set)
             })
@@ -111,28 +102,15 @@ module.exports = app => {
 
 
 
-    /* const remove = (req, res) => {
-         const comment = { ...req.body }
-         app.db('comments')
-             .where({ id: comment.id })
-             .whereNull('deleted_at')
-             .first()
-             .update({ : new Date() })
-             .then(() => res.status(204).send())
-             .catch((e) => {
-                 res.status(501).send()
-             }
-             )
-     }*/
 
-     const remove = async(req, res) => {
+    const remove = async (req, res) => {
 
 
-        const admin_token = {...req.user}
-        const comment= {...req.body}
+        const admin_token = { ...req.user }
+        const comment = { ...req.body }
 
         app.db('comments')
-            .where({id: comment.id, admin_id:admin_token.id})
+            .where({ id: comment.id, admin_id: admin_token.id })
             .first()
             .del()
             .then(_ => res.status(204).send())

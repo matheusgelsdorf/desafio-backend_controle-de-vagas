@@ -14,23 +14,17 @@ module.exports = app => {
 
         if (administrator.registered_at) delete administrator['registered_at']
 
-// --==--        if (administrator.deleted_at) delete administrator['deleted_at']
 
-        /* Validações */
 
         try {
             if (req.method === "PUT") {
                 app.api.validation.existsOrError(administrator, "Insira os dados que deseja atualizar.")
-                //name 
                 if (administrator.name || administrator.name === "") app.api.validation.existsOrError(administrator.name, "Insira um nome.")
-                //cpf
                 if (administrator.cpf || administrator.cpf === "") app.api.validation.existsOrError(administrator.cpf, "Insira o cpf.")
-                //email
                 if (administrator.email) {
                     app.api.validation.existsOrError(administrator.email, "Insira um email válido.")
                     app.api.validation.validateEmail(administrator.email, "Email inválido.")
                 }
-                //phone
                 if (administrator.phone || administrator.phone === "") app.api.validation.existsOrError(administrator.phone, "Insira um número de telefone")
 
             }
@@ -50,18 +44,16 @@ module.exports = app => {
         catch (e) {
             return res.status(400).send(e)
         }
-        /* ---------------- */
 
 
 
-        if (administrator.password) administrator.password = encryptPassword(administrator.password) // caso o metodo for PUT
+        if (administrator.password) administrator.password = encryptPassword(administrator.password)
         delete administrator['confirmPassword']
 
 
         if (req.method === "PUT") {
             app.db('administrators')
                 .where({ id: administrator_token.id })
-             // --==--   .whereNull('deleted_at')
                 .first()
                 .update(administrator)
                 .then(() => {
@@ -85,7 +77,6 @@ module.exports = app => {
 
         app.db('administrators')
             .where({ cpf })
-       // --==--     .whereNull('deleted_at')
             .first()
             .then(administrator_from_db => {
                 let administrator = {
@@ -104,7 +95,6 @@ module.exports = app => {
     const get = (req, res) => {
         app.db('administrators')
             .select('id', 'name', 'cpf', 'email', 'phone')
-         // --==--   .whereNull('deleted_at')
             .then(administrators => res.json(administrators))
             .catch(() => res.status(502).send())
     }

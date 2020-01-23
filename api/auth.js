@@ -7,18 +7,17 @@ const bcrypt = require('bcrypt-nodejs')
 module.exports = app => {
 
     const signinCandidate = async (req, res) => {
-        try{
+        try {
             app.api.validation.existsOrError(req.body.email, "Insira o email.")
             app.api.validation.existsOrError(req.body.password, "Insira a senha.")
 
         }
-        catch(e){
+        catch (e) {
             return res.status(400).send(e)
         }
 
         const candidate = await app.db('candidates')
             .where({ email: req.body.email })
-        // --==--    .whereNull('deleted_at')
             .first()
             .catch(_ => res.status(500).send('Erro interno.'))
 
@@ -36,7 +35,7 @@ module.exports = app => {
             email: candidate.email,
             cpf: candidate.cpf,
             phone: candidate.phone,
-            isAdmin:false,
+            isAdmin: false,
             iat: now,
             exp: now + (60 * 60 * 10)
         }
@@ -47,18 +46,17 @@ module.exports = app => {
     }
 
     const signinAdmin = async (req, res) => {
-        try{
+        try {
             app.api.validation.existsOrError(req.body.email, "Insira o email.")
             app.api.validation.existsOrError(req.body.password, "Insira a senha.")
 
         }
-        catch(e){
+        catch (e) {
             return res.status(400).send(e)
         }
 
         const admin = await app.db('administrators')
             .where({ email: req.body.email })
-        // --==--    .whereNull('deleted_at')
             .first()
             .catch(_ => res.status(500).send('Erro interno.'))
 
@@ -76,19 +74,18 @@ module.exports = app => {
             email: admin.email,
             cpf: admin.cpf,
             phone: admin.phone,
-            isAdmin:true,
+            isAdmin: true,
             iat: now,
             exp: now + (60 * 60 * 10)
         }
         res.json({
-            ...payload, // usado pelo front
+            ...payload,
             token: jwt.encode(payload, authSecret)
         })
     }
 
-   
 
-    // Check if all token fields are valid.
+
     const validateToken = async (req, res) => {
         const loginData = req.body || null
 
@@ -99,13 +96,12 @@ module.exports = app => {
 
 
                 if (token.isAdmin) table_id = 'administrators'
-                else  table_id = 'candidates'
-             
+                else table_id = 'candidates'
+
 
                 if (new Date(token.exp * 1000) > new Date()) {
 
                     const user_from_db = await app.db(table_id)
-               // --==--         .whereNull('deleted_at')
                         .where({ id: token.id })
                         .first()
                     if ((token.name === user_from_db.name) &&
@@ -129,5 +125,5 @@ module.exports = app => {
     }
 
 
-    return { signinCandidate, signinAdmin, validateToken}
+    return { signinCandidate, signinAdmin, validateToken }
 }

@@ -2,19 +2,19 @@
 
 module.exports = {
 
-    client: 'postgresql',
-    connection: {
-      database: 'desafio_db',
-      user:     'postgres',
-      password: 'abc123'
-    },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      tableName: 'knex_migrations'
-    }
-  
+  client: 'postgresql',
+  connection: {
+    database: 'desafio_db',
+    user: 'postgres',
+    password: 'abc123'
+  },
+  pool: {
+    min: 2,
+    max: 10
+  },
+  migrations: {
+    tableName: 'knex_migrations'
+  }
+
 
 };

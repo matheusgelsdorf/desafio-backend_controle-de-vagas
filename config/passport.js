@@ -11,19 +11,18 @@ module.exports = app => {
     }
 
     const strategy = new Strategy(params, (payload, done) => {
-        
+
         if (new Date(payload.exp * 1000) < new Date()) {
             return done('Token Expirado.', false)
         }
-       
+
 
         if (payload.isAdmin) {
             app.db('administrators')
                 .where({ id: payload.id })
-    // --==--            .whereNull("deleted_at")
                 .first()
                 .then(admin_from_db => {
-                
+
                     if (
                         admin_from_db &&
                         payload.email === admin_from_db.email &&
@@ -34,20 +33,19 @@ module.exports = app => {
                         return done(null, { ...payload })
                     }
                     else {
-                        throw ('Login Inválido. Administrator') //[***] Verificar se precisa desse log.
+                        throw ('Login Inválido. Administrator')
                     }
 
                 })
-                .catch(err =>{ 
+                .catch(err => {
                     done(err, false)
                 })
         }
 
-        else{
+        else {
 
             app.db('candidates')
                 .where({ id: payload.id })
-     // --==--           .whereNull("deleted_at")
                 .first()
                 .then(candidate_from_db => {
                     if (
@@ -55,12 +53,12 @@ module.exports = app => {
                         payload.email === candidate_from_db.email &&
                         payload.cpf === candidate_from_db.cpf &&
                         payload.name === candidate_from_db.name &&
-                        payload.phone === candidate_from_db.phone 
+                        payload.phone === candidate_from_db.phone
                     ) {
                         return done(null, { ...payload })
                     }
                     else {
-                        throw ('Login Inválido. User') //[***] Verificar se precisa desse log.
+                        throw ('Login Inválido. User')
                     }
 
                 })
