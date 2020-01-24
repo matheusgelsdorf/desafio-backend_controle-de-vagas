@@ -74,20 +74,12 @@ module.exports = app => {
     const getAdministratorByCpf = (req, res) => {
 
         const cpf = req.user.cpf
-
         app.db('administrators')
+            .select(['id','name','email','cpf','phone'])
             .where({ cpf })
             .first()
-            .then(administrator_from_db => {
-                let administrator = {
-                    name: administrator_from_db.name,
-                    email: administrator_from_db.email,
-                    cpf: administrator_from_db.cpf,
-                    phone: administrator_from_db.phone,
-                    id: administrator_from_db.id
-                }
-                return res.json(administrator)
-            })
+            .then(administrator_from_db => res.json(administrator_from_db)
+            )
             .catch(err => res.status(500).send())
 
     }

@@ -125,19 +125,19 @@ module.exports = app => {
             if (!job_application_from_db) res.status(404).send('Candidatura nao encontrada.')
 
             if (!access_token.isAdmin && job_application_from_db.candidate_id !== access_token.id) {
-                return res.status(401).send('Voce nao tem permissao de acessar essa candidatura 1.')
+                return res.status(401).send('Voce nao tem permissao para acessar essa candidatura.')
             }
             const vacancy_from_db = await app.db('job_vacancies')
                 .where({ id: job_application_from_db.vacancy_id })
                 .first()
 
-            if (access_token.isAdmin && vacancy_from_db.admin_id !== access_token.id) return res.status(401).send('Voce nao tem permissao de acessar essa candidatura.')
+            if (access_token.isAdmin && vacancy_from_db.admin_id !== access_token.id) return res.status(401).send('Voce nao tem permissao para acessar essa candidatura.')
 
             return res.json(job_application_from_db)
 
         }
         catch (e) {
-            return res.status(500).send('Erro interno.' + e)
+            return res.status(500).send('Erro interno.')
         }
 
     }
