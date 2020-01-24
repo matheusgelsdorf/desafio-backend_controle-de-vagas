@@ -29,8 +29,13 @@ Este projeto consiste em uma API de controle de candidatos para vagas de emprego
   * `npm start`
   * O servidor é executado na porta 3000.
 
-##### 4. Em um primeiro momento somente o usuario "AdminRoot" está cadastrado, sendo necessários alimentar o banco de dados através das rotas.
-
+##### 4. Em um primeiro momento somente o usuario "AdminRoot" está cadastrado, sendo necessários alimentar o banco de dados através das rotas. Os dados para realizar o login com o AdminRoot são:
+  ```json
+  {
+    "email":"admin@admin.com",
+    "password":"12345"
+  }
+  ``` 
 ##### 5. A autenticação é realizada inserindo o JWT (JSON Web Token) que é retornado das rotas `/signin/admin` e `/signin/candidate` no header `Auth` como um _bearer token_.
 
 ---
